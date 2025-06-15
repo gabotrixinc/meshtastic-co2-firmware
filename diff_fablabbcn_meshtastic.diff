@@ -1,0 +1,1991 @@
+diff --git a/.github/FUNDING.yml b/.github/FUNDING.yml
+new file mode 100644
+index 000000000..8529eb7fc
+--- /dev/null
++++ b/.github/FUNDING.yml
+@@ -0,0 +1,3 @@
++# These are supported funding model platforms
++
++open_collective: meshtastic
+diff --git a/.github/pull_request_template.md b/.github/pull_request_template.md
+index a15b34aae..0142c57a2 100644
+--- a/.github/pull_request_template.md
++++ b/.github/pull_request_template.md
+@@ -1,6 +1,7 @@
+ ## ðŸ™ Thank you for sending in a pull request, here's some tips to get started!
+ 
+ ### âŒ (Please delete all these tips and replace them with your text) âŒ
++
+ - Before starting on some new big chunk of code, it it is optional but highly recommended to open an issue first
+   to say "Hey, I think this idea X should be implemented and I'm starting work on it. My general plan is Y, any feedback
+   is appreciated." This will allow other devs to potentially save you time by not accidentially duplicating work etc...
+@@ -15,12 +16,12 @@
+ - If you do not have the affected hardware to test your code changes adequately against regressions, please indicate this, so that contributors and commnunity members can help test your changes.
+ - If your PR gets accepted you can request a "Contributor" role in the Meshtastic Discord
+ 
+-
+ ## ðŸ¤ Attestations
++
+ - [ ] I have tested that my proposed changes behave as described.
+ - [ ] I have tested that my proposed changes do not cause any obvious regressions on the following devices:
+   - [ ] Heltec (Lora32) V3
+-  - [ ] LilyGo T-Deck 
++  - [ ] LilyGo T-Deck
+   - [ ] LilyGo T-Beam
+   - [ ] RAK WisBlock 4631
+   - [ ] Seeed Studio T-1000E tracker card
+diff --git a/.trunk/trunk.yaml b/.trunk/trunk.yaml
+index 5217ae181..8bf5c6748 100644
+--- a/.trunk/trunk.yaml
++++ b/.trunk/trunk.yaml
+@@ -8,10 +8,10 @@ plugins:
+       uri: https://github.com/trunk-io/plugins
+ lint:
+   enabled:
+-    - checkov@3.2.437
+-    - renovate@40.42.2
++    - checkov@3.2.440
++    - renovate@40.51.0
+     - prettier@3.5.3
+-    - trufflehog@3.88.35
++    - trufflehog@3.89.1
+     - yamllint@1.37.1
+     - bandit@1.8.3
+     - trivy@0.63.0
+@@ -28,7 +28,7 @@ lint:
+     - shellcheck@0.10.0
+     - black@25.1.0
+     - git-diff-check
+-    - gitleaks@8.27.0
++    - gitleaks@8.27.2
+     - clang-format@16.0.3
+   ignore:
+     - linters: [ALL]
+diff --git a/bin/config.d/lora-RAK6421.yaml b/bin/config.d/lora-RAK6421.yaml
+new file mode 100644
+index 000000000..bbf38a474
+--- /dev/null
++++ b/bin/config.d/lora-RAK6421.yaml
+@@ -0,0 +1,21 @@
++Lora:
++
++  ### RAK13300in Slot 1
++  Module: sx1262
++  IRQ: 22 #IO6
++  Reset: 16 # IO4
++  Busy: 24 # IO5
++  # Ant_sw: 13 # IO3 
++  DIO3_TCXO_VOLTAGE: true
++  DIO2_AS_RF_SWITCH: true
++  spidev: spidev0.0
++  # CS: 8
++
++
++  ### RAK13300in Slot 2 pins
++#  IRQ: 18 #IO6
++#  Reset: 24 # IO4
++#  Busy: 19 # IO5
++#  # Ant_sw: 23 # IO3 
++#  spidev: spidev0.1
++#  # CS: 7
+\ No newline at end of file
+diff --git a/boards/gat562_mesh_trial_tracker.json b/boards/gat562_mesh_trial_tracker.json
+new file mode 100644
+index 000000000..a3fb8a264
+--- /dev/null
++++ b/boards/gat562_mesh_trial_tracker.json
+@@ -0,0 +1,52 @@
++{
++  "build": {
++    "arduino": {
++      "ldscript": "nrf52840_s140_v6.ld"
++    },
++    "core": "nRF5",
++    "cpu": "cortex-m4",
++    "extra_flags": "-DARDUINO_NRF52840_FEATHER -DNRF52840_XXAA",
++    "f_cpu": "64000000L",
++    "hwids": [
++      ["0x239A", "0x8029"],
++      ["0x239A", "0x0029"],
++      ["0x239A", "0x002A"],
++      ["0x239A", "0x802A"]
++    ],
++    "usb_product": "GAT562 Mesh Trial Tracker",
++    "mcu": "nrf52840",
++    "variant": "gat562_mesh_trial_tracker",
++    "bsp": {
++      "name": "adafruit"
++    },
++    "softdevice": {
++      "sd_flags": "-DS140",
++      "sd_name": "s140",
++      "sd_version": "6.1.1",
++      "sd_fwid": "0x00B6"
++    },
++    "bootloader": {
++      "settings_addr": "0xFF000"
++    }
++  },
++  "connectivity": ["bluetooth"],
++  "debug": {
++    "jlink_device": "nRF52840_xxAA",
++    "svd_path": "nrf52840.svd",
++    "openocd_target": "nrf52840-mdk-rs"
++  },
++  "frameworks": ["arduino", "freertos"],
++  "name": "GAT562 Mesh Trial Tracker",
++  "upload": {
++    "maximum_ram_size": 248832,
++    "maximum_size": 815104,
++    "speed": 115200,
++    "protocol": "nrfutil",
++    "protocols": ["jlink", "nrfjprog", "nrfutil", "stlink"],
++    "use_1200bps_touch": true,
++    "require_upload_port": true,
++    "wait_for_upload_port": true
++  },
++  "url": "http://www.gat-iot.com/",
++  "vendor": "GAT-IOT"
++}
+diff --git a/boards/seeed_xiao_nrf52840_kit.json b/boards/seeed_xiao_nrf52840_kit.json
+index 4c5fdbeda..676733874 100644
+--- a/boards/seeed_xiao_nrf52840_kit.json
++++ b/boards/seeed_xiao_nrf52840_kit.json
+@@ -7,9 +7,7 @@
+     "cpu": "cortex-m4",
+     "extra_flags": "-DARDUINO_MDBT50Q_RX -DNRF52840_XXAA",
+     "f_cpu": "64000000L",
+-    "hwids": [
+-      ["0x2886", "0x0166"]
+-    ],
++    "hwids": [["0x2886", "0x0166"]],
+     "usb_product": "XIAO-BOOT",
+     "mcu": "nrf52840",
+     "variant": "seeed_xiao_nrf52840_kit",
+diff --git a/platformio.ini b/platformio.ini
+index 555879fb5..c2d65ec02 100644
+--- a/platformio.ini
++++ b/platformio.ini
+@@ -108,7 +108,7 @@ lib_deps =
+ [device-ui_base]
+ lib_deps =
+ 	# renovate: datasource=git-refs depName=meshtastic/device-ui packageName=https://github.com/meshtastic/device-ui gitBranch=master
+-	https://github.com/meshtastic/device-ui/archive/1b520fcb168c7447a8d6a6ebc56954c9f472e964.zip
++	https://github.com/meshtastic/device-ui/archive/301f11e584cbeccf08af923bb2a0e02b669bda0b.zip
+ 
+ ; Common libs for environmental measurements in telemetry module
+ [environmental_base]
+diff --git a/protobufs b/protobufs
+index 0c112881d..c758376d0 160000
+--- a/protobufs
++++ b/protobufs
+@@ -1 +1 @@
+-Subproject commit 0c112881dfb4aa24a61ee55dd4c46abbfc093717
++Subproject commit c758376d04cf5d3d42de24f9388836a18bae9a76
+diff --git a/src/concurrency/Lock.cpp b/src/concurrency/Lock.cpp
+index 11501359b..0fe80e455 100644
+--- a/src/concurrency/Lock.cpp
++++ b/src/concurrency/Lock.cpp
+@@ -9,17 +9,23 @@ namespace concurrency
+ Lock::Lock() : handle(xSemaphoreCreateBinary())
+ {
+     assert(handle);
+-    assert(xSemaphoreGive(handle));
++    if (xSemaphoreGive(handle) == false) {
++        abort();
++    }
+ }
+ 
+ void Lock::lock()
+ {
+-    assert(xSemaphoreTake(handle, portMAX_DELAY));
++    if (xSemaphoreTake(handle, portMAX_DELAY) == false) {
++        abort();
++    }
+ }
+ 
+ void Lock::unlock()
+ {
+-    assert(xSemaphoreGive(handle));
++    if (xSemaphoreGive(handle) == false) {
++        abort();
++    }
+ }
+ #else
+ Lock::Lock() {}
+diff --git a/src/graphics/niche/Drivers/EInk/GDEY0154D67.cpp b/src/graphics/niche/Drivers/EInk/GDEY0154D67.cpp
+index 2cab179b9..9a06fa841 100644
+--- a/src/graphics/niche/Drivers/EInk/GDEY0154D67.cpp
++++ b/src/graphics/niche/Drivers/EInk/GDEY0154D67.cpp
+@@ -9,12 +9,9 @@ void GDEY0154D67::configScanning()
+ {
+     // "Driver output control"
+     sendCommand(0x01);
+-    sendData(0xC7);
++    sendData(0xC7); // Scan until gate 199 (200px vertical res.)
+     sendData(0x00);
+     sendData(0x00);
+-
+-    // To-do: delete this method?
+-    // Values set here might be redundant: C7, 00, 00 seems to be default
+ }
+ 
+ // Specify which information is used to control the sequence of voltages applied to move the pixels
+@@ -52,10 +49,10 @@ void GDEY0154D67::detachFromUpdate()
+ {
+     switch (updateType) {
+     case FAST:
+-        return beginPolling(50, 500); // At least 500ms for fast refresh
++        return beginPolling(50, 300); // At least 300ms for fast refresh
+     case FULL:
+     default:
+-        return beginPolling(100, 2000); // At least 2 seconds for full refresh
++        return beginPolling(100, 1500); // At least 1.5 seconds for full refresh
+     }
+ }
+ #endif // MESHTASTIC_INCLUDE_NICHE_GRAPHICS
+\ No newline at end of file
+diff --git a/src/graphics/niche/Drivers/EInk/GDEY0154D67.h b/src/graphics/niche/Drivers/EInk/GDEY0154D67.h
+index 93c641e44..e391eea50 100644
+--- a/src/graphics/niche/Drivers/EInk/GDEY0154D67.h
++++ b/src/graphics/niche/Drivers/EInk/GDEY0154D67.h
+@@ -31,9 +31,9 @@ class GDEY0154D67 : public SSD16XX
+     GDEY0154D67() : SSD16XX(width, height, supported) {}
+ 
+   protected:
+-    virtual void configScanning() override;
+-    virtual void configWaveform() override;
+-    virtual void configUpdateSequence() override;
++    void configScanning() override;
++    void configWaveform() override;
++    void configUpdateSequence() override;
+     void detachFromUpdate() override;
+ };
+ 
+diff --git a/src/graphics/niche/Drivers/EInk/GDEY0213B74.cpp b/src/graphics/niche/Drivers/EInk/GDEY0213B74.cpp
+index a0ff63258..b3a585eb7 100644
+--- a/src/graphics/niche/Drivers/EInk/GDEY0213B74.cpp
++++ b/src/graphics/niche/Drivers/EInk/GDEY0213B74.cpp
+@@ -12,9 +12,6 @@ void GDEY0213B74::configScanning()
+     sendData(0xF9);
+     sendData(0x00);
+     sendData(0x00);
+-
+-    // To-do: delete this method?
+-    // Values set here might be redundant: F9, 00, 00 seems to be default
+ }
+ 
+ // Specify which information is used to control the sequence of voltages applied to move the pixels
+diff --git a/src/graphics/niche/Drivers/EInk/HINK_E0213A289.cpp b/src/graphics/niche/Drivers/EInk/HINK_E0213A289.cpp
+new file mode 100644
+index 000000000..0509b0502
+--- /dev/null
++++ b/src/graphics/niche/Drivers/EInk/HINK_E0213A289.cpp
+@@ -0,0 +1,61 @@
++#include "./HINK_E0213A289.h"
++
++#ifdef MESHTASTIC_INCLUDE_NICHE_GRAPHICS
++
++using namespace NicheGraphics::Drivers;
++
++// Map the display controller IC's output to the connected panel
++void HINK_E0213A289::configScanning()
++{
++    // "Driver output control"
++    // Scan gates from 0 to 249 (vertical resolution 250px)
++    sendCommand(0x01);
++    sendData(0xF9); // Maximum gate # (249, bits 0-7)
++    sendData(0x00); // Maximum gate # (bit 8)
++    sendData(0x00); // (Do not invert scanning order)
++}
++
++// Specify which information is used to control the sequence of voltages applied to move the pixels
++// - For this display, configUpdateSequence() specifies that a suitable LUT will be loaded from
++//   the controller IC's OTP memory, when the update procedure begins.
++void HINK_E0213A289::configWaveform()
++{
++    sendCommand(0x3C); // Border waveform:
++    sendData(0x05);    // Screen border should follow LUT1 waveform (actively drive pixels white)
++
++    sendCommand(0x18); // Temperature sensor:
++    sendData(0x80);    // Use internal temperature sensor to select an appropriate refresh waveform
++}
++
++// Describes the sequence of events performed by the displays controller IC during a refresh
++// Includes "power up", "load settings from memory", "update the pixels", etc
++void HINK_E0213A289::configUpdateSequence()
++{
++    switch (updateType) {
++    case FAST:
++        sendCommand(0x22); // Set "update sequence"
++        sendData(0xFF);    // Will load LUT from OTP memory, Display mode 2 "differential refresh"
++        break;
++
++    case FULL:
++    default:
++        sendCommand(0x22); // Set "update sequence"
++        sendData(0xF7);    // Will load LUT from OTP memory
++        break;
++    }
++}
++
++// Once the refresh operation has been started,
++// begin periodically polling the display to check for completion, using the normal Meshtastic threading code
++// Only used when refresh is "async"
++void HINK_E0213A289::detachFromUpdate()
++{
++    switch (updateType) {
++    case FAST:
++        return beginPolling(50, 500); // At least 500ms for fast refresh
++    case FULL:
++    default:
++        return beginPolling(100, 1000); // At least 1 second for full refresh (quick; display only blinks pixels once)
++    }
++}
++#endif // MESHTASTIC_INCLUDE_NICHE_GRAPHICS
+\ No newline at end of file
+diff --git a/src/graphics/niche/Drivers/EInk/HINK_E0213A289.h b/src/graphics/niche/Drivers/EInk/HINK_E0213A289.h
+new file mode 100644
+index 000000000..eab0bf59d
+--- /dev/null
++++ b/src/graphics/niche/Drivers/EInk/HINK_E0213A289.h
+@@ -0,0 +1,44 @@
++/*
++
++E-Ink display driver
++    - HINK_E0213A289
++    - Manufacturer: Holitech
++    - Size: 2.13 inch
++    - Resolution: 122px x 250px
++    - Flex connector label (not a unique identifier): FPC-7528B
++
++    Note: as of Feb. 2025, these panels are used for "WeActStudio 2.13in B&W" display modules
++
++*/
++
++#pragma once
++
++#ifdef MESHTASTIC_INCLUDE_NICHE_GRAPHICS
++
++#include "configuration.h"
++
++#include "./SSD16XX.h"
++
++namespace NicheGraphics::Drivers
++{
++class HINK_E0213A289 : public SSD16XX
++{
++    // Display properties
++  private:
++    static constexpr uint32_t width = 122;
++    static constexpr uint32_t height = 250;
++    static constexpr UpdateTypes supported = (UpdateTypes)(FULL | FAST);
++
++  public:
++    HINK_E0213A289() : SSD16XX(width, height, supported, 1) {}
++
++  protected:
++    void configScanning() override;
++    void configWaveform() override;
++    void configUpdateSequence() override;
++    void detachFromUpdate() override;
++};
++
++} // namespace NicheGraphics::Drivers
++
++#endif // MESHTASTIC_INCLUDE_NICHE_GRAPHICS
+\ No newline at end of file
+diff --git a/src/graphics/niche/Drivers/EInk/ZJY200200_0154DAAMFGN.h b/src/graphics/niche/Drivers/EInk/ZJY200200_0154DAAMFGN.h
+new file mode 100644
+index 000000000..fb16bcf2f
+--- /dev/null
++++ b/src/graphics/niche/Drivers/EInk/ZJY200200_0154DAAMFGN.h
+@@ -0,0 +1,32 @@
++/*
++
++E-Ink display driver
++    - ZJY200200-0154DAAMFGN
++    - Manufacturer: Zhongjingyuan
++    - Size: 1.54 inch
++    - Resolution: 200px x 200px
++    - Flex connector marking: FPC-B001
++
++    Note: as of Feb. 2025, these panels are used for "WeActStudio 1.54in B&W" display modules
++
++    This *is* a distinct panel, however the driver is currently identical to GDEY0154D67
++    We recognize it as separate now, to avoid breaking any custom builds if the drivers do need to diverge in future.
++
++*/
++
++#pragma once
++
++#ifdef MESHTASTIC_INCLUDE_NICHE_GRAPHICS
++
++#include "configuration.h"
++
++#include "./GDEY0154D67.h"
++
++namespace NicheGraphics::Drivers
++{
++
++typedef GDEY0154D67 ZJY200200_0154DAAMFGN;
++
++} // namespace NicheGraphics::Drivers
++
++#endif // MESHTASTIC_INCLUDE_NICHE_GRAPHICS
+\ No newline at end of file
+diff --git a/src/main.cpp b/src/main.cpp
+index 7ecd634c9..a35a5007f 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -928,6 +928,11 @@ void setup()
+     service = new MeshService();
+     service->init();
+ 
++    if (nodeDB->keyIsLowEntropy) {
++        service->reloadConfig(SEGMENT_CONFIG);
++        rebootAtMsec = (millis() + DEFAULT_REBOOT_SECONDS * 1000);
++    }
++
+     // Now that the mesh service is created, create any modules
+     setupModules();
+ 
+diff --git a/src/mesh/NodeDB.cpp b/src/mesh/NodeDB.cpp
+index 477629342..b1ec7b347 100644
+--- a/src/mesh/NodeDB.cpp
++++ b/src/mesh/NodeDB.cpp
+@@ -278,7 +278,6 @@ NodeDB::NodeDB()
+             config.security.private_key.size = 32;
+             owner.public_key.size = 32;
+             memcpy(owner.public_key.bytes, config.security.public_key.bytes, 32);
+-            keyIsLowEntropy = checkLowEntropyPublicKey(owner.public_key);
+         }
+     }
+ #elif !(MESHTASTIC_EXCLUDE_PKI)
+@@ -287,11 +286,17 @@ NodeDB::NodeDB()
+         owner.public_key.size = config.security.public_key.size;
+         memcpy(owner.public_key.bytes, config.security.public_key.bytes, config.security.public_key.size);
+         crypto->setDHPrivateKey(config.security.private_key.bytes);
+-        keyIsLowEntropy = checkLowEntropyPublicKey(owner.public_key);
+     }
+ #endif
++    keyIsLowEntropy = checkLowEntropyPublicKey(config.security.public_key);
+     if (keyIsLowEntropy) {
+-        LOG_WARN(LOW_ENTROPY_WARNING);
++        LOG_WARN("Erasing low entropy keys");
++        config.security.private_key.size = 0;
++        memfll(config.security.private_key.bytes, '\0', sizeof(config.security.private_key.bytes));
++        config.security.public_key.size = 0;
++        memfll(config.security.public_key.bytes, '\0', sizeof(config.security.public_key.bytes));
++        owner.public_key.size = 0;
++        memfll(owner.public_key.bytes, '\0', sizeof(owner.public_key.bytes));
+     }
+     // Include our owner in the node db under our nodenum
+     meshtastic_NodeInfoLite *info = getOrCreateMeshNode(getNodeNum());
+@@ -1540,15 +1545,25 @@ void NodeDB::addFromContact(meshtastic_SharedContact contact)
+         return;
+     }
+     info->num = contact.node_num;
+-    info->last_heard = getValidTime(RTCQualityNTP);
+     info->has_user = true;
+     info->user = TypeConversions::ConvertToUserLite(contact.user);
+-    info->is_favorite = true;
+-    // Mark the node's key as manually verified to indicate trustworthiness.
+-    info->bitfield |= NODEINFO_BITFIELD_IS_KEY_MANUALLY_VERIFIED_MASK;
+-    updateGUIforNode = info;
+-    powerFSM.trigger(EVENT_NODEDB_UPDATED);
+-    notifyObservers(true); // Force an update whether or not our node counts have changed
++    if (contact.should_ignore) {
++        // If should_ignore is set,
++        // we need to clear the public key and other cruft, in addition to setting the node as ignored
++        info->is_ignored = true;
++        info->has_device_metrics = false;
++        info->has_position = false;
++        info->user.public_key.size = 0;
++        info->user.public_key.bytes[0] = 0;
++    } else {
++        info->last_heard = getValidTime(RTCQualityNTP);
++        info->is_favorite = true;
++        info->bitfield |= NODEINFO_BITFIELD_IS_KEY_MANUALLY_VERIFIED_MASK;
++        // Mark the node's key as manually verified to indicate trustworthiness.
++        updateGUIforNode = info;
++        powerFSM.trigger(EVENT_NODEDB_UPDATED);
++        notifyObservers(true); // Force an update whether or not our node counts have changed
++    }
+     saveNodeDatabaseToDisk();
+ }
+ 
+@@ -1562,16 +1577,17 @@ bool NodeDB::updateUser(uint32_t nodeId, meshtastic_User &p, uint8_t channelInde
+     }
+ 
+ #if !(MESHTASTIC_EXCLUDE_PKI)
+-    if (p.public_key.size == 32) {
++    if (p.public_key.size == 32 && nodeId != nodeDB->getNodeNum()) {
+         printBytes("Incoming Pubkey: ", p.public_key.bytes, 32);
+ 
+         // Alert the user if a remote node is advertising public key that matches our own
+         if (owner.public_key.size == 32 && memcmp(p.public_key.bytes, owner.public_key.bytes, 32) == 0 && !duplicateWarned) {
+             duplicateWarned = true;
+-            char warning[] = "Remote device %s has advertised your public key. This may indicate a low-entropy key. You may need "
++            char warning[] = "Remote device %s has advertised your public key. This may indicate a compromised key. You may need "
+                              "to regenerate your public keys.";
+             LOG_WARN(warning, p.long_name);
+             meshtastic_ClientNotification *cn = clientNotificationPool.allocZeroed();
++            cn->which_payload_variant = meshtastic_ClientNotification_duplicated_public_key_tag;
+             cn->level = meshtastic_LogRecord_Level_WARNING;
+             cn->time = getValidTime(RTCQualityFromNet);
+             sprintf(cn->message, warning, p.long_name);
+@@ -1751,28 +1767,37 @@ UserLicenseStatus NodeDB::getLicenseStatus(uint32_t nodeNum)
+     return info->user.is_licensed ? UserLicenseStatus::Licensed : UserLicenseStatus::NotLicensed;
+ }
+ 
+-bool NodeDB::checkLowEntropyPublicKey(const meshtastic_User_public_key_t keyToTest)
++bool NodeDB::checkLowEntropyPublicKey(const meshtastic_Config_SecurityConfig_public_key_t keyToTest)
+ {
+-    uint8_t keyHash[32] = {0};
+-    memcpy(keyHash, keyToTest.bytes, keyToTest.size);
+-    crypto->hash(keyHash, 32);
+-    if (memcmp(keyHash, LOW_ENTROPY_HASH1, sizeof(LOW_ENTROPY_HASH1)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH2, sizeof(LOW_ENTROPY_HASH2)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH3, sizeof(LOW_ENTROPY_HASH3)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH4, sizeof(LOW_ENTROPY_HASH4)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH5, sizeof(LOW_ENTROPY_HASH5)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH6, sizeof(LOW_ENTROPY_HASH6)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH7, sizeof(LOW_ENTROPY_HASH7)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH8, sizeof(LOW_ENTROPY_HASH8)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH9, sizeof(LOW_ENTROPY_HASH9)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH10, sizeof(LOW_ENTROPY_HASH10)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH11, sizeof(LOW_ENTROPY_HASH11)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH12, sizeof(LOW_ENTROPY_HASH12)) == 0 ||
+-        memcmp(keyHash, LOW_ENTROPY_HASH13, sizeof(LOW_ENTROPY_HASH13)) == 0) {
+-        return true;
+-    } else {
+-        return false;
++    if (keyToTest.size == 32) {
++        uint8_t keyHash[32] = {0};
++        memcpy(keyHash, keyToTest.bytes, keyToTest.size);
++        crypto->hash(keyHash, 32);
++        if (memcmp(keyHash, LOW_ENTROPY_HASH1, sizeof(LOW_ENTROPY_HASH1)) ==
++                0 || // should become an array that gets looped through rather than this abomination
++            memcmp(keyHash, LOW_ENTROPY_HASH2, sizeof(LOW_ENTROPY_HASH2)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH3, sizeof(LOW_ENTROPY_HASH3)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH4, sizeof(LOW_ENTROPY_HASH4)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH5, sizeof(LOW_ENTROPY_HASH5)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH6, sizeof(LOW_ENTROPY_HASH6)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH7, sizeof(LOW_ENTROPY_HASH7)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH8, sizeof(LOW_ENTROPY_HASH8)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH9, sizeof(LOW_ENTROPY_HASH9)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH10, sizeof(LOW_ENTROPY_HASH10)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH11, sizeof(LOW_ENTROPY_HASH11)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH12, sizeof(LOW_ENTROPY_HASH12)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH13, sizeof(LOW_ENTROPY_HASH13)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH14, sizeof(LOW_ENTROPY_HASH14)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH15, sizeof(LOW_ENTROPY_HASH15)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH16, sizeof(LOW_ENTROPY_HASH16)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH17, sizeof(LOW_ENTROPY_HASH17)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH18, sizeof(LOW_ENTROPY_HASH18)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH19, sizeof(LOW_ENTROPY_HASH19)) == 0 ||
++            memcmp(keyHash, LOW_ENTROPY_HASH20, sizeof(LOW_ENTROPY_HASH20)) == 0) {
++            return true;
++        }
+     }
++    return false;
+ }
+ 
+ bool NodeDB::backupPreferences(meshtastic_AdminMessage_BackupLocation location)
+diff --git a/src/mesh/NodeDB.h b/src/mesh/NodeDB.h
+index f03cdd6b6..90ca5aefd 100644
+--- a/src/mesh/NodeDB.h
++++ b/src/mesh/NodeDB.h
+@@ -58,7 +58,28 @@ static const uint8_t LOW_ENTROPY_HASH12[] = {0x48, 0x6f, 0x1e, 0x48, 0x97, 0x88,
+ static const uint8_t LOW_ENTROPY_HASH13[] = {0x09, 0xb4, 0xe2, 0x6d, 0x28, 0x98, 0xc9, 0x47, 0x66, 0x46, 0xbf,
+                                              0xff, 0x58, 0x17, 0x91, 0xaa, 0xc3, 0xbf, 0x4a, 0x9d, 0x0b, 0x88,
+                                              0xb1, 0xf1, 0x03, 0xdd, 0x61, 0xd7, 0xba, 0x9e, 0x64, 0x98};
+-static const char LOW_ENTROPY_WARNING[] = "Your Device is configured with a low entropy key. Suggest regenerating DM keys";
++static const uint8_t LOW_ENTROPY_HASH14[] = {0x39, 0x39, 0x84, 0xe0, 0x22, 0x2f, 0x7d, 0x78, 0x45, 0x18, 0x72,
++                                             0xb4, 0x13, 0xd2, 0x01, 0x2f, 0x3c, 0xa1, 0xb0, 0xfe, 0x39, 0xd0,
++                                             0xf1, 0x3c, 0x72, 0xd6, 0xef, 0x54, 0xd5, 0x77, 0x22, 0xa0};
++static const uint8_t LOW_ENTROPY_HASH15[] = {0x0a, 0xda, 0x5f, 0xec, 0xff, 0x5c, 0xc0, 0x2e, 0x5f, 0xc4, 0x8d,
++                                             0x03, 0xe5, 0x80, 0x59, 0xd3, 0x5d, 0x49, 0x86, 0xe9, 0x8d, 0xf6,
++                                             0xf6, 0x16, 0x35, 0x3d, 0xf9, 0x9b, 0x29, 0x55, 0x9e, 0x64};
++static const uint8_t LOW_ENTROPY_HASH16[] = {0x08, 0x56, 0xF0, 0xD7, 0xEF, 0x77, 0xD6, 0x11, 0x1C, 0x8F, 0x95,
++                                             0x2D, 0x3C, 0xDF, 0xB1, 0x22, 0xBF, 0x60, 0x9B, 0xE5, 0xA9, 0xC0,
++                                             0x6E, 0x4B, 0x01, 0xDC, 0xD1, 0x57, 0x44, 0xB2, 0xA5, 0xCF};
++static const uint8_t LOW_ENTROPY_HASH17[] = {0x2C, 0xB2, 0x77, 0x85, 0xD6, 0xB7, 0x48, 0x9C, 0xFE, 0xBC, 0x80,
++                                             0x26, 0x60, 0xF4, 0x6D, 0xCE, 0x11, 0x31, 0xA2, 0x1E, 0x33, 0x0A,
++                                             0x6D, 0x2B, 0x00, 0xFA, 0x0C, 0x90, 0x95, 0x8F, 0x5C, 0x6B};
++static const uint8_t LOW_ENTROPY_HASH18[] = {0xFA, 0x59, 0xC8, 0x6E, 0x94, 0xEE, 0x75, 0xC9, 0x9A, 0xB0, 0xFE,
++                                             0x89, 0x36, 0x40, 0xC9, 0x99, 0x4A, 0x3B, 0xF4, 0xAA, 0x12, 0x24,
++                                             0xA2, 0x0F, 0xF9, 0xD1, 0x08, 0xCB, 0x78, 0x19, 0xAA, 0xE5};
++static const uint8_t LOW_ENTROPY_HASH19[] = {0x6E, 0x42, 0x7A, 0x4A, 0x8C, 0x61, 0x62, 0x22, 0xA1, 0x89, 0xD3,
++                                             0xA4, 0xC2, 0x19, 0xA3, 0x83, 0x53, 0xA7, 0x7A, 0x0A, 0x89, 0xE2,
++                                             0x54, 0x52, 0x62, 0x3D, 0xE7, 0xCA, 0x8C, 0xF6, 0x6A, 0x60};
++static const uint8_t LOW_ENTROPY_HASH20[] = {0x20, 0x27, 0x2F, 0xBA, 0x0C, 0x99, 0xD7, 0x29, 0xF3, 0x11, 0x35,
++                                             0x89, 0x9D, 0x0E, 0x24, 0xA1, 0xC3, 0xCB, 0xDF, 0x8A, 0xF1, 0xC6,
++                                             0xFE, 0xD0, 0xD7, 0x9F, 0x92, 0xD6, 0x8F, 0x59, 0xBF, 0xE4};
++static const char LOW_ENTROPY_WARNING[] = "Compromised keys detected, please regenerate.";
+ #endif
+ /*
+ DeviceState versions used to be defined in the .proto file but really only this function cares.  So changed to a
+@@ -251,7 +272,7 @@ class NodeDB
+ 
+     bool hasValidPosition(const meshtastic_NodeInfoLite *n);
+ 
+-    bool checkLowEntropyPublicKey(const meshtastic_User_public_key_t keyToTest);
++    bool checkLowEntropyPublicKey(const meshtastic_Config_SecurityConfig_public_key_t keyToTest);
+ 
+     bool backupPreferences(meshtastic_AdminMessage_BackupLocation location);
+     bool restorePreferences(meshtastic_AdminMessage_BackupLocation location,
+diff --git a/src/mesh/Router.cpp b/src/mesh/Router.cpp
+index b7206c020..02968513c 100644
+--- a/src/mesh/Router.cpp
++++ b/src/mesh/Router.cpp
+@@ -554,6 +554,7 @@ meshtastic_Routing_Error perhapsEncode(meshtastic_MeshPacket *p)
+                 LOG_WARN(LOW_ENTROPY_WARNING);
+                 if (!nodeDB->hasWarned) {
+                     meshtastic_ClientNotification *cn = clientNotificationPool.allocZeroed();
++                    cn->which_payload_variant = meshtastic_ClientNotification_low_entropy_key_tag;
+                     cn->level = meshtastic_LogRecord_Level_WARNING;
+                     cn->time = getValidTime(RTCQualityFromNet);
+                     sprintf(cn->message, LOW_ENTROPY_WARNING);
+diff --git a/src/mesh/generated/meshtastic/admin.pb.h b/src/mesh/generated/meshtastic/admin.pb.h
+index c111d3993..071640b0d 100644
+--- a/src/mesh/generated/meshtastic/admin.pb.h
++++ b/src/mesh/generated/meshtastic/admin.pb.h
+@@ -130,6 +130,8 @@ typedef struct _meshtastic_SharedContact {
+     /* The User of the contact */
+     bool has_user;
+     meshtastic_User user;
++    /* Add this contact to the blocked / ignored list */
++    bool should_ignore;
+ } meshtastic_SharedContact;
+ 
+ /* This message is used by a client to initiate or complete a key verification */
+@@ -317,13 +319,13 @@ extern "C" {
+ #define meshtastic_AdminMessage_InputEvent_init_default {0, 0, 0, 0}
+ #define meshtastic_HamParameters_init_default    {"", 0, 0, ""}
+ #define meshtastic_NodeRemoteHardwarePinsResponse_init_default {0, {meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default, meshtastic_NodeRemoteHardwarePin_init_default}}
+-#define meshtastic_SharedContact_init_default    {0, false, meshtastic_User_init_default}
++#define meshtastic_SharedContact_init_default    {0, false, meshtastic_User_init_default, 0}
+ #define meshtastic_KeyVerificationAdmin_init_default {_meshtastic_KeyVerificationAdmin_MessageType_MIN, 0, 0, false, 0}
+ #define meshtastic_AdminMessage_init_zero        {0, {0}, {0, {0}}}
+ #define meshtastic_AdminMessage_InputEvent_init_zero {0, 0, 0, 0}
+ #define meshtastic_HamParameters_init_zero       {"", 0, 0, ""}
+ #define meshtastic_NodeRemoteHardwarePinsResponse_init_zero {0, {meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero, meshtastic_NodeRemoteHardwarePin_init_zero}}
+-#define meshtastic_SharedContact_init_zero       {0, false, meshtastic_User_init_zero}
++#define meshtastic_SharedContact_init_zero       {0, false, meshtastic_User_init_zero, 0}
+ #define meshtastic_KeyVerificationAdmin_init_zero {_meshtastic_KeyVerificationAdmin_MessageType_MIN, 0, 0, false, 0}
+ 
+ /* Field tags (for use in manual encoding/decoding) */
+@@ -338,6 +340,7 @@ extern "C" {
+ #define meshtastic_NodeRemoteHardwarePinsResponse_node_remote_hardware_pins_tag 1
+ #define meshtastic_SharedContact_node_num_tag    1
+ #define meshtastic_SharedContact_user_tag        2
++#define meshtastic_SharedContact_should_ignore_tag 3
+ #define meshtastic_KeyVerificationAdmin_message_type_tag 1
+ #define meshtastic_KeyVerificationAdmin_remote_nodenum_tag 2
+ #define meshtastic_KeyVerificationAdmin_nonce_tag 3
+@@ -500,7 +503,8 @@ X(a, STATIC,   REPEATED, MESSAGE,  node_remote_hardware_pins,   1)
+ 
+ #define meshtastic_SharedContact_FIELDLIST(X, a) \
+ X(a, STATIC,   SINGULAR, UINT32,   node_num,          1) \
+-X(a, STATIC,   OPTIONAL, MESSAGE,  user,              2)
++X(a, STATIC,   OPTIONAL, MESSAGE,  user,              2) \
++X(a, STATIC,   SINGULAR, BOOL,     should_ignore,     3)
+ #define meshtastic_SharedContact_CALLBACK NULL
+ #define meshtastic_SharedContact_DEFAULT NULL
+ #define meshtastic_SharedContact_user_MSGTYPE meshtastic_User
+@@ -535,7 +539,7 @@ extern const pb_msgdesc_t meshtastic_KeyVerificationAdmin_msg;
+ #define meshtastic_HamParameters_size            31
+ #define meshtastic_KeyVerificationAdmin_size     25
+ #define meshtastic_NodeRemoteHardwarePinsResponse_size 496
+-#define meshtastic_SharedContact_size            123
++#define meshtastic_SharedContact_size            125
+ 
+ #ifdef __cplusplus
+ } /* extern "C" */
+diff --git a/src/modules/AdminModule.cpp b/src/modules/AdminModule.cpp
+index 4005222dc..551602f00 100644
+--- a/src/modules/AdminModule.cpp
++++ b/src/modules/AdminModule.cpp
+@@ -7,6 +7,7 @@
+ #include "SPILock.h"
+ #include "meshUtils.h"
+ #include <FSCommon.h>
++#include <ctype.h> // for better whitespace handling
+ #if defined(ARCH_ESP32) && !MESHTASTIC_EXCLUDE_BLUETOOTH
+ #include "BleOta.h"
+ #endif
+@@ -155,6 +156,28 @@ bool AdminModule::handleReceivedProtobuf(const meshtastic_MeshPacket &mp, meshta
+      */
+     case meshtastic_AdminMessage_set_owner_tag:
+         LOG_DEBUG("Client set owner");
++        // Validate names
++        if (*r->set_owner.long_name) {
++            const char *start = r->set_owner.long_name;
++            // Skip all whitespace (space, tab, newline, etc)
++            while (*start && isspace((unsigned char)*start))
++                start++;
++            if (*start == '\0') {
++                LOG_WARN("Rejected long_name: must contain at least 1 non-whitespace character");
++                myReply = allocErrorResponse(meshtastic_Routing_Error_BAD_REQUEST, &mp);
++                break;
++            }
++        }
++        if (*r->set_owner.short_name) {
++            const char *start = r->set_owner.short_name;
++            while (*start && isspace((unsigned char)*start))
++                start++;
++            if (*start == '\0') {
++                LOG_WARN("Rejected short_name: must contain at least 1 non-whitespace character");
++                myReply = allocErrorResponse(meshtastic_Routing_Error_BAD_REQUEST, &mp);
++                break;
++            }
++        }
+         handleSetOwner(r->set_owner);
+         break;
+ 
+@@ -699,11 +722,16 @@ void AdminModule::handleSetConfig(const meshtastic_Config &c)
+         LOG_INFO("Set config: Security");
+         config.security = c.payload_variant.security;
+ #if !(MESHTASTIC_EXCLUDE_PKI_KEYGEN) && !(MESHTASTIC_EXCLUDE_PKI)
+-        // We check for a potentially valid private key, and a blank public key, and regen the public key if needed.
+-        if (config.security.private_key.size == 32 && !memfll(config.security.private_key.bytes, 0, 32) &&
+-            (config.security.public_key.size == 0 || memfll(config.security.public_key.bytes, 0, 32))) {
+-            if (crypto->regeneratePublicKey(config.security.public_key.bytes, config.security.private_key.bytes)) {
+-                config.security.public_key.size = 32;
++        // If the client set the key to blank, go ahead and regenerate so long as we're not in ham mode
++        if (!owner.is_licensed && config.lora.region != meshtastic_Config_LoRaConfig_RegionCode_UNSET) {
++            if (config.security.private_key.size != 32) {
++                crypto->generateKeyPair(config.security.public_key.bytes, config.security.private_key.bytes);
++
++            } else if (config.security.public_key.size != 32) {
++                // We check for a potentially valid private key, and a blank public key, and regen the public key if needed.
++                if (crypto->regeneratePublicKey(config.security.public_key.bytes, config.security.private_key.bytes)) {
++                    config.security.public_key.size = 32;
++                }
+             }
+         }
+ #endif
+@@ -1153,6 +1181,27 @@ void AdminModule::handleStoreDeviceUIConfig(const meshtastic_DeviceUIConfig &uic
+ 
+ void AdminModule::handleSetHamMode(const meshtastic_HamParameters &p)
+ {
++    // Validate ham parameters before setting since this would bypass validation in the owner struct
++    if (*p.call_sign) {
++        const char *start = p.call_sign;
++        // Skip all whitespace
++        while (*start && isspace((unsigned char)*start))
++            start++;
++        if (*start == '\0') {
++            LOG_WARN("Rejected ham call_sign: must contain at least 1 non-whitespace character");
++            return;
++        }
++    }
++    if (*p.short_name) {
++        const char *start = p.short_name;
++        while (*start && isspace((unsigned char)*start))
++            start++;
++        if (*start == '\0') {
++            LOG_WARN("Rejected ham short_name: must contain at least 1 non-whitespace character");
++            return;
++        }
++    }
++
+     // Set call sign and override lora limitations for licensed use
+     strncpy(owner.long_name, p.call_sign, sizeof(owner.long_name));
+     strncpy(owner.short_name, p.short_name, sizeof(owner.short_name));
+diff --git a/src/modules/Telemetry/Sensor/INA3221Sensor.h b/src/modules/Telemetry/Sensor/INA3221Sensor.h
+index 69edf8c50..0581f92f6 100644
+--- a/src/modules/Telemetry/Sensor/INA3221Sensor.h
++++ b/src/modules/Telemetry/Sensor/INA3221Sensor.h
+@@ -8,16 +8,24 @@
+ #include "VoltageSensor.h"
+ #include <INA3221.h>
+ 
++#ifndef INA3221_ENV_CH
++#define INA3221_ENV_CH INA3221_CH1
++#endif
++
++#ifndef INA3221_BAT_CH
++#define INA3221_BAT_CH INA3221_CH1
++#endif
++
+ class INA3221Sensor : public TelemetrySensor, VoltageSensor, CurrentSensor
+ {
+   private:
+     INA3221 ina3221 = INA3221(INA3221_ADDR42_SDA);
+ 
+     // channel to report voltage/current for environment metrics
+-    ina3221_ch_t ENV_CH = INA3221_CH1;
++    static const ina3221_ch_t ENV_CH = INA3221_ENV_CH;
+ 
+     // channel to report battery voltage for device_battery_ina_address
+-    ina3221_ch_t BAT_CH = INA3221_CH1;
++    static const ina3221_ch_t BAT_CH = INA3221_BAT_CH;
+ 
+     // get a single measurement for a channel
+     struct _INA3221Measurement getMeasurement(ina3221_ch_t ch);
+diff --git a/src/mqtt/MQTT.cpp b/src/mqtt/MQTT.cpp
+index dca8a3b44..894579a2f 100644
+--- a/src/mqtt/MQTT.cpp
++++ b/src/mqtt/MQTT.cpp
+@@ -763,7 +763,10 @@ void MQTT::onSend(const meshtastic_MeshPacket &mp_encrypted, const meshtastic_Me
+         }
+         entry->topic = std::move(topic);
+         entry->envBytes.assign(bytes, numBytes);
+-        assert(mqttQueue.enqueue(entry, 0));
++        if (mqttQueue.enqueue(entry, 0) == false) {
++            LOG_CRIT("Failed to add a message to mqttQueue!");
++            abort();
++        }
+     }
+ }
+ 
+diff --git a/src/platform/esp32/main-esp32.cpp b/src/platform/esp32/main-esp32.cpp
+index 3c4faac3e..cdea53c9a 100644
+--- a/src/platform/esp32/main-esp32.cpp
++++ b/src/platform/esp32/main-esp32.cpp
+@@ -56,9 +56,11 @@ void updateBatteryLevel(uint8_t level) {}
+ void getMacAddr(uint8_t *dmac)
+ {
+ #if defined(CONFIG_IDF_TARGET_ESP32C6) && defined(CONFIG_SOC_IEEE802154_SUPPORTED)
+-    assert(esp_base_mac_addr_get(dmac) == ESP_OK);
++    auto res = esp_base_mac_addr_get(dmac);
++    assert(res == ESP_OK);
+ #else
+-    assert(esp_efuse_mac_get_default(dmac) == ESP_OK);
++    auto res = esp_efuse_mac_get_default(dmac);
++    assert(res == ESP_OK);
+ #endif
+ }
+ 
+diff --git a/src/platform/nrf52/architecture.h b/src/platform/nrf52/architecture.h
+index 8ea2c3829..a69816d0b 100644
+--- a/src/platform/nrf52/architecture.h
++++ b/src/platform/nrf52/architecture.h
+@@ -49,6 +49,8 @@
+ #define HW_VENDOR meshtastic_HardwareModel_RAK2560
+ #elif defined(WISMESH_TAP)
+ #define HW_VENDOR meshtastic_HardwareModel_WISMESH_TAP
++#elif defined(GAT562_MESH_TRIAL_TRACKER)
++#define HW_VENDOR meshtastic_HardwareModel_GAT562_MESH_TRIAL_TRACKER
+ #elif defined(RAK4630)
+ #define HW_VENDOR meshtastic_HardwareModel_RAK4631
+ #elif defined(TTGO_T_ECHO)
+@@ -141,4 +143,4 @@
+ #if !defined(PIN_SERIAL_RX) && !defined(NRF52840_XXAA)
+ // No serial ports on this board - ONLY use segger in memory console
+ #define USE_SEGGER
+-#endif
+\ No newline at end of file
++#endif
+diff --git a/userPrefs.jsonc b/userPrefs.jsonc
+index a349a5700..497327478 100644
+--- a/userPrefs.jsonc
++++ b/userPrefs.jsonc
+@@ -21,6 +21,7 @@
+   // "USERPREFS_CONFIG_LORA_REGION": "meshtastic_Config_LoRaConfig_RegionCode_US",
+   // "USERPREFS_CONFIG_OWNER_LONG_NAME": "My Long Name",
+   // "USERPREFS_CONFIG_OWNER_SHORT_NAME": "MLN",
++  // "USERPREFS_CONFIG_DEVICE_ROLE": "meshtastic_Config_DeviceConfig_Role_CLIENT", // Defaults to CLIENT. ROUTER*, LOST AND FOUND, and REPEATER roles are restricted.
+   // "USERPREFS_EVENT_MODE": "1",
+   // "USERPREFS_FIXED_BLUETOOTH": "121212",
+   // "USERPREFS_FIXED_GPS": "",
+diff --git a/variants/diy/nrf52_promicro_diy_tcxo/custom_build_tasks.py b/variants/diy/nrf52_promicro_diy_tcxo/custom_build_tasks.py
+new file mode 100644
+index 000000000..00896e21f
+--- /dev/null
++++ b/variants/diy/nrf52_promicro_diy_tcxo/custom_build_tasks.py
+@@ -0,0 +1,62 @@
++# Simplifies DIY InkHUD builds, with presets for several common E-Ink displays
++# - build using custom task in Platformio's "Project Tasks" panel
++# - build with `pio run -e <variant> -t build_weact_154` (or similar)
++
++# Silence trunk's objections to the import statements
++# trunk-ignore-all(ruff/F821)
++# trunk-ignore-all(flake8/F821)
++
++from SCons.Script import COMMAND_LINE_TARGETS
++
++Import("env")
++Import("projenv")
++
++# Custom targets
++# These wrappers just run the normal build task under a different target name
++# We intercept the build later on, based on the target name
++env.AddTarget(
++    name="build_weact_154",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 1.54")',
++)
++env.AddTarget(
++    name="build_weact_213",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 2.13")',
++)
++env.AddTarget(
++    name="build_weact_290",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 2.9")',
++)
++env.AddTarget(
++    name="build_weact_420",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 4.2")',
++)
++
++# Check whether a build was started via one of our custom targets above
++
++if "build_weact_154" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 1.54" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "ZJY200200_0154DAAMFGN"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "15"))
++
++elif "build_weact_213" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 2.13" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "HINK_E0213A289"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "10"))
++
++elif "build_weact_290" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 2.9" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "ZJY128296_029EAAMFGN"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "15"))
++
++elif "build_weact_420" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 4.2" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "HINK_E042A87"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "15"))
+diff --git a/variants/diy/nrf52_promicro_diy_tcxo/nicheGraphics.h b/variants/diy/nrf52_promicro_diy_tcxo/nicheGraphics.h
+new file mode 100644
+index 000000000..bbd530595
+--- /dev/null
++++ b/variants/diy/nrf52_promicro_diy_tcxo/nicheGraphics.h
+@@ -0,0 +1,94 @@
++#pragma once
++
++#include "configuration.h"
++
++#ifdef MESHTASTIC_INCLUDE_NICHE_GRAPHICS
++
++// InkHUD-specific components
++// ---------------------------
++#include "graphics/niche/InkHUD/InkHUD.h"
++
++// Applets
++#include "graphics/niche/InkHUD/Applets/User/AllMessage/AllMessageApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/DM/DMApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/Heard/HeardApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/Positions/PositionsApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/RecentsList/RecentsListApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/ThreadedMessage/ThreadedMessageApplet.h"
++
++// Shared NicheGraphics components
++// --------------------------------
++#include "graphics/niche/Drivers/EInk/HINK_E0213A289.h"        // WeAct 2.13"
++#include "graphics/niche/Drivers/EInk/HINK_E042A87.h"          // WeAct 4.2"
++#include "graphics/niche/Drivers/EInk/ZJY128296_029EAAMFGN.h"  // WeAct 2.9"
++#include "graphics/niche/Drivers/EInk/ZJY200200_0154DAAMFGN.h" // WeACt 1.54"
++
++#include "graphics/niche/Inputs/TwoButton.h"
++
++#if !defined(INKHUD_BUILDCONF_DRIVER) || !defined(INKHUD_BUILDCONF_DISPLAYRESILIENCE)
++#error If not using a DIY preset, display model and resilience must be set manually
++#endif
++
++void setupNicheGraphics()
++{
++    using namespace NicheGraphics;
++
++    // SPI
++    // -----------------------------
++    SPI.begin();
++
++    // Driver
++    // -----------------------------
++
++    // Use E-Ink driver
++    Drivers::EInk *driver = new Drivers::INKHUD_BUILDCONF_DRIVER;
++    driver->begin(&SPI, PIN_EINK_DC, PIN_EINK_CS, PIN_EINK_BUSY, PIN_EINK_RES);
++
++    // InkHUD
++    // ----------------------------
++
++    InkHUD::InkHUD *inkhud = InkHUD::InkHUD::getInstance();
++
++    // Set the driver
++    inkhud->setDriver(driver);
++
++    // Set how many FAST updates per FULL update.
++    inkhud->setDisplayResilience(INKHUD_BUILDCONF_DISPLAYRESILIENCE); // Suggest roughly ten
++
++    // Prepare fonts
++    InkHUD::Applet::fontLarge = FREESANS_9PT_WIN1252;
++    InkHUD::Applet::fontSmall = FREESANS_6PT_WIN1252;
++
++    // Init settings, and customize defaults
++    // Values ignored individually if found saved to flash
++    inkhud->persistence->settings.rotation = (driver->height > driver->width ? 1 : 0); // Rotate 90deg to landscape, if needed
++    inkhud->persistence->settings.userTiles.maxCount = 4;
++    inkhud->persistence->settings.optionalFeatures.batteryIcon = true;
++
++    // Pick applets
++    // Note: order of applets determines priority of "auto-show" feature
++    inkhud->addApplet("All Messages", new InkHUD::AllMessageApplet);
++    inkhud->addApplet("DMs", new InkHUD::DMApplet, true, false, 3);                       // Default on tile 3
++    inkhud->addApplet("Channel 0", new InkHUD::ThreadedMessageApplet(0), true, false, 2); // Default on tile 2
++    inkhud->addApplet("Channel 1", new InkHUD::ThreadedMessageApplet(1));
++    inkhud->addApplet("Positions", new InkHUD::PositionsApplet, true, false, 1);      // Default on tile 1
++    inkhud->addApplet("Recents List", new InkHUD::RecentsListApplet, true, false, 0); // Default on tile 0
++    inkhud->addApplet("Heard", new InkHUD::HeardApplet, true);                        // Background
++
++    // Start running InkHUD
++    inkhud->begin();
++
++    // Buttons
++    // --------------------------
++
++    Inputs::TwoButton *buttons = Inputs::TwoButton::getInstance(); // Shared NicheGraphics component
++
++    // Setup the main user button
++    buttons->setWiring(0, Inputs::TwoButton::getUserButtonPin(), true); // Internal pull up
++    buttons->setHandlerShortPress(0, [inkhud]() { inkhud->shortpress(); });
++    buttons->setHandlerLongPress(0, [inkhud]() { inkhud->longpress(); });
++
++    buttons->start();
++}
++
++#endif
+\ No newline at end of file
+diff --git a/variants/diy/nrf52_promicro_diy_tcxo/variant.h b/variants/diy/nrf52_promicro_diy_tcxo/variant.h
+index de49018f4..e93442c7e 100644
+--- a/variants/diy/nrf52_promicro_diy_tcxo/variant.h
++++ b/variants/diy/nrf52_promicro_diy_tcxo/variant.h
+@@ -22,26 +22,26 @@ extern "C" {
+ /*
+ NRF52 PRO MICRO PIN ASSIGNMENT
+ 
+-| Pin   | Function    |     | Pin      | Function     | RF95  |
++| Pin Â  | Function Â   | Â    | Pin Â  Â   | Function Â  Â  | RF95  |
+ | ----- | ----------- | --- | -------- | ------------ | ----- |
+-| Gnd   |             |     | vbat     |              |       |
+-| P0.06 | Serial2 RX  |     | vbat     |              |       |
+-| P0.08 | Serial2 TX  |     | Gnd      |              |       |
+-| Gnd   |             |     | reset    |              |       |
+-| Gnd   |             |     | ext_vcc  | *see 0.13    |       |
+-| P0.17 | RXEN        |     | P0.31    | BATTERY_PIN  |       |
+-| P0.20 | GPS_RX      |     | P0.29    | BUSY         | DIO0  |
+-| P0.22 | GPS_TX      |     | P0.02    | MISO         | MISO  |
+-| P0.24 | GPS_EN      |     | P1.15    | MOSI         | MOSI  |
+-| P1.00 | BUTTON_PIN  |     | P1.13    | CS           | CS    |
+-| P0.11 | SCL         |     | P1.11    | SCK          | SCK   |
+-| P1.04 | SDA         |     | P0.10    | DIO1/IRQ     | DIO1  |
+-| P1.06 | Free pin    |     | P0.09    | RESET        | RST   |
+-|       |             |     |          |              |       |
+-|       | Mid board   |     |          | Internal     |       |
+-| P1.01 | Free pin    |     | 0.15     | LED          |       |
+-| P1.02 | Free pin    |     | 0.13     | 3V3_EN       |       |
+-| P1.07 | Free pin    |     |          |              |       |
++| Gnd Â  | Â  Â  Â  Â  Â  Â  | Â    | vbat Â  Â  | Â  Â  Â  Â  Â  Â   |       |
++| P0.06 | Serial2 RX  | Â    | vbat Â  Â  | Â  Â  Â  Â  Â  Â   |       |
++| P0.08 | Serial2 TX  | Â    | Gnd Â  Â   | Â  Â  Â  Â  Â  Â   |       |
++| Gnd Â  | Â  Â  Â  Â  Â  Â  | Â    | reset Â   | Â  Â  Â  Â  Â  Â   |       |
++| Gnd Â  | Â  Â  Â  Â  Â  Â  | Â    | ext_vcc  | *see 0.13 Â   |       |
++| P0.17 | RXEN Â  Â  Â   | Â    | P0.31 Â   | BATTERY_PIN  |       |
++| P0.20 | GPS_RX Â  Â   | Â    | P0.29 Â   | BUSY Â  Â  Â  Â  | DIO0  |
++| P0.22 | GPS_TX Â  Â   | Â    | P0.02 Â   | MISO         | MISO  |
++| P0.24 | GPS_EN Â  Â   | Â    | P1.15 Â   | MOSI Â  Â  Â  Â  | MOSI  |
++| P1.00 | BUTTON_PIN  | Â    | P1.13 Â   | CS Â  Â  Â  Â  Â  | CS Â   |
++| P0.11 | SCL Â  Â  Â  Â  | Â    | P1.11 Â   | SCK Â  Â  Â  Â   | SCK   |
++| P1.04 | SDA Â  Â  Â  Â  | Â    | P0.10 Â   | DIO1/IRQ Â  Â  | DIO1  |
++| P1.06 | Free pin Â   | Â    | P0.09 Â   | RESET Â  Â  Â   | RST   |
++| Â  Â  Â  | Â  Â  Â  Â  Â  Â  | Â    | Â  Â  Â  Â   | Â  Â  Â  Â  Â  Â   |       |
++| Â  Â  Â  | Mid board Â  | Â    | Â  Â  Â  Â   | Internal Â  Â  |       |
++| P1.01 | Free pin Â   | Â    | 0.15 Â  Â  | LED Â  Â  Â  Â   |       |
++| P1.02 | Free pin Â   | Â    | 0.13 Â  Â  | 3V3_EN Â  Â  Â  |       |
++| P1.07 | Free pin Â   | Â    | Â  Â  Â  Â   | Â  Â  Â  Â  Â  Â   |       |
+ */
+ 
+ // Number of pins defined in PinDescription array
+@@ -185,6 +185,12 @@ settings.
+ #define SX126X_DIO3_TCXO_VOLTAGE 1.8
+ #define TCXO_OPTIONAL // make it so that the firmware can try both TCXO and XTAL
+ 
++// E-Ink DIY
++#define PIN_EINK_CS (32 + 7)
++#define PIN_EINK_DC (32 + 2)
++#define PIN_EINK_RES (32 + 1)
++#define PIN_EINK_BUSY (32 + 6)
++
+ #ifdef __cplusplus
+ }
+ #endif
+diff --git a/variants/diy/platformio.ini b/variants/diy/platformio.ini
+index d8ceee9cc..24ea9cc9d 100644
+--- a/variants/diy/platformio.ini
++++ b/variants/diy/platformio.ini
+@@ -68,6 +68,27 @@ lib_deps =
+   ${nrf52840_base.lib_deps}
+ debug_tool = jlink
+ 
++; NRF52 ProMicro w/ E-Ink display
++[env:nrf52_promicro_diy-inkhud]
++board_level = extra
++extends = nrf52840_base, inkhud
++board = promicro-nrf52840
++build_flags =
++  ${nrf52840_base.build_flags}
++  ${inkhud.build_flags}
++  -I variants/diy/nrf52_promicro_diy_tcxo
++  -D NRF52_PROMICRO_DIY
++build_src_filter =
++  ${nrf52_base.build_src_filter}
++  ${inkhud.build_src_filter}
++  +<../variants/diy/nrf52_promicro_diy_tcxo>
++lib_deps =
++  ${inkhud.lib_deps} ; InkHUD libs first, so we get GFXRoot instead of AdafruitGFX
++  ${nrf52840_base.lib_deps}
++extra_scripts =
++  ${env.extra_scripts}
++  variants/diy/nrf52_promicro_diy_tcxo/custom_build_tasks.py ; Add to PIO's Project Tasks pane: preset builds for common displays
++
+ ; Seeed XIAO nRF52840 + XIAO Wio SX1262 DIY
+ [env:seeed-xiao-nrf52840-wio-sx1262]
+ board = xiao_ble_sense
+diff --git a/variants/gat562_mesh_trial_tracker/platformio.ini b/variants/gat562_mesh_trial_tracker/platformio.ini
+new file mode 100644
+index 000000000..e67f3ec8d
+--- /dev/null
++++ b/variants/gat562_mesh_trial_tracker/platformio.ini
+@@ -0,0 +1,13 @@
++; The very slick RAK wireless RAK 4631 / 4630 board - Unified firmware for 5005/19003, with or without OLED RAK 1921
++[env:gat562_mesh_trial_tracker]
++extends = nrf52840_base
++board = gat562_mesh_trial_tracker
++board_check = true
++build_flags = ${nrf52840_base.build_flags} -Ivariants/gat562_mesh_trial_tracker -D GAT562_MESH_TRIAL_TRACKER
++  -DGPS_POWER_TOGGLE ; comment this line to disable triple press function on the user button to turn off gps entirely.
++  -DRADIOLIB_EXCLUDE_SX128X=1
++  -DRADIOLIB_EXCLUDE_SX127X=1
++  -DRADIOLIB_EXCLUDE_LR11X0=1
++build_src_filter = ${nrf52_base.build_src_filter} +<../variants/gat562_mesh_trial_tracker>
++lib_deps = 
++  ${nrf52840_base.lib_deps}
+diff --git a/variants/gat562_mesh_trial_tracker/variant.cpp b/variants/gat562_mesh_trial_tracker/variant.cpp
+new file mode 100644
+index 000000000..e84b60b3b
+--- /dev/null
++++ b/variants/gat562_mesh_trial_tracker/variant.cpp
+@@ -0,0 +1,45 @@
++/*
++  Copyright (c) 2014-2015 Arduino LLC.  All right reserved.
++  Copyright (c) 2016 Sandeep Mistry All right reserved.
++  Copyright (c) 2018, Adafruit Industries (adafruit.com)
++
++  This library is free software; you can redistribute it and/or
++  modify it under the terms of the GNU Lesser General Public
++  License as published by the Free Software Foundation; either
++  version 2.1 of the License, or (at your option) any later version.
++
++  This library is distributed in the hope that it will be useful,
++  but WITHOUT ANY WARRANTY; without even the implied warranty of
++  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
++  See the GNU Lesser General Public License for more details.
++
++  You should have received a copy of the GNU Lesser General Public
++  License along with this library; if not, write to the Free Software
++  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++*/
++
++#include "variant.h"
++#include "nrf.h"
++#include "wiring_constants.h"
++#include "wiring_digital.h"
++
++const uint32_t g_ADigitalPinMap[] = {
++    // P0
++    0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
++
++    // P1
++    32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47};
++
++void initVariant()
++{
++    // LED1 & LED2
++    pinMode(PIN_LED1, OUTPUT);
++    ledOff(PIN_LED1);
++
++    pinMode(PIN_LED2, OUTPUT);
++    ledOff(PIN_LED2);
++
++    // 3V3 Power Rail
++    pinMode(PIN_3V3_EN, OUTPUT);
++    digitalWrite(PIN_3V3_EN, HIGH);
++}
+diff --git a/variants/gat562_mesh_trial_tracker/variant.h b/variants/gat562_mesh_trial_tracker/variant.h
+new file mode 100644
+index 000000000..2af0bc76d
+--- /dev/null
++++ b/variants/gat562_mesh_trial_tracker/variant.h
+@@ -0,0 +1,288 @@
++/*
++  Copyright (c) 2014-2015 Arduino LLC.  All right reserved.
++  Copyright (c) 2016 Sandeep Mistry All right reserved.
++  Copyright (c) 2018, Adafruit Industries (adafruit.com)
++
++  This library is free software; you can redistribute it and/or
++  modify it under the terms of the GNU Lesser General Public
++  License as published by the Free Software Foundation; either
++  version 2.1 of the License, or (at your option) any later version.
++  This library is distributed in the hope that it will be useful,
++  but WITHOUT ANY WARRANTY; without even the implied warranty of
++  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
++  See the GNU Lesser General Public License for more details.
++  You should have received a copy of the GNU Lesser General Public
++  License along with this library; if not, write to the Free Software
++  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++*/
++
++#ifndef _VARIANT_GAT562_MESH_TRIAL_TRACKER_
++#define _VARIANT_GAT562_MESH_TRIAL_TRACKER_
++
++#define GAT562_MESH_TRIAL_TRACKER
++
++// led pin 2 (blue), see https://github.com/meshtastic/firmware/blob/master/src/mesh/NodeDB.cpp#L723
++#define RAK4630
++
++/** Master clock frequency */
++#define VARIANT_MCK (64000000ul)
++
++#define USE_LFXO // Board uses 32khz crystal for LF
++// define USE_LFRC    // Board uses RC for LF
++
++/*----------------------------------------------------------------------------
++ *        Headers
++ *----------------------------------------------------------------------------*/
++
++#include "WVariant.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif // __cplusplus
++
++// Number of pins defined in PinDescription array
++#define PINS_COUNT (48)
++#define NUM_DIGITAL_PINS (48)
++#define NUM_ANALOG_INPUTS (6)
++#define NUM_ANALOG_OUTPUTS (0)
++
++// LEDs
++#define PIN_LED1 (35)
++#define PIN_LED2 (36)
++
++#define LED_BUILTIN PIN_LED1
++#define LED_CONN PIN_LED2
++
++#define LED_GREEN PIN_LED1
++#define LED_BLUE PIN_LED2
++
++#define LED_STATE_ON 1 // State when LED is litted
++
++/*
++ * Buttons
++ */
++
++#define PIN_BUTTON1 9 // Pin for button on E-ink button module or IO expansion
++#define BUTTON_NEED_PULLUP
++#define PIN_BUTTON2 12
++#define PIN_BUTTON3 24
++#define PIN_BUTTON4 25
++
++/*
++ * Analog pins
++ */
++#define PIN_A0 (5)
++#define PIN_A1 (31)
++#define PIN_A2 (28)
++#define PIN_A3 (29)
++#define PIN_A4 (30)
++#define PIN_A5 (31)
++#define PIN_A6 (0xff)
++#define PIN_A7 (0xff)
++
++static const uint8_t A0 = PIN_A0;
++static const uint8_t A1 = PIN_A1;
++static const uint8_t A2 = PIN_A2;
++static const uint8_t A3 = PIN_A3;
++static const uint8_t A4 = PIN_A4;
++static const uint8_t A5 = PIN_A5;
++static const uint8_t A6 = PIN_A6;
++static const uint8_t A7 = PIN_A7;
++#define ADC_RESOLUTION 14
++
++// Other pins
++#define PIN_AREF (2)
++#define PIN_NFC1 (9)
++#define PIN_NFC2 (10)
++
++static const uint8_t AREF = PIN_AREF;
++
++/*
++ * Serial interfaces
++ */
++#define PIN_SERIAL1_RX (15)
++#define PIN_SERIAL1_TX (16)
++
++// Connected to Jlink CDC
++#define PIN_SERIAL2_RX (8)
++#define PIN_SERIAL2_TX (6)
++
++/*
++ * SPI Interfaces
++ */
++#define SPI_INTERFACES_COUNT 2
++
++#define PIN_SPI_MISO (45)
++#define PIN_SPI_MOSI (44)
++#define PIN_SPI_SCK (43)
++
++#define PIN_SPI1_MISO (29) // (0 + 29)
++#define PIN_SPI1_MOSI (30) // (0 + 30)
++#define PIN_SPI1_SCK (3)   // (0 + 3)
++
++static const uint8_t SS = 42;
++static const uint8_t MOSI = PIN_SPI_MOSI;
++static const uint8_t MISO = PIN_SPI_MISO;
++static const uint8_t SCK = PIN_SPI_SCK;
++
++/*
++ * eink display pins
++ */
++
++// #define PIN_EINK_CS (0 + 26)
++// #define PIN_EINK_BUSY (0 + 4)
++// #define PIN_EINK_DC (0 + 17)
++// #define PIN_EINK_RES (-1)
++// #define PIN_EINK_SCLK (0 + 3)
++// #define PIN_EINK_MOSI (0 + 30) // also called SDI
++
++// #define USE_EINK
++
++// Display - OLED connected via I2C
++#define HAS_SCREEN 1
++#define USE_SSD1306
++
++// RAKRGB
++// #define HAS_NCP5623
++
++/*
++ * Wire Interfaces
++ */
++#define WIRE_INTERFACES_COUNT 1
++
++#define PIN_WIRE_SDA (13)
++#define PIN_WIRE_SCL (14)
++
++// QSPI Pins
++#define PIN_QSPI_SCK 3
++#define PIN_QSPI_CS 26
++#define PIN_QSPI_IO0 30
++#define PIN_QSPI_IO1 29
++#define PIN_QSPI_IO2 28
++#define PIN_QSPI_IO3 2
++
++// On-board QSPI Flash
++#define EXTERNAL_FLASH_DEVICES IS25LP080D
++#define EXTERNAL_FLASH_USE_QSPI
++
++/* @note RAK5005-O GPIO mapping to RAK4631 GPIO ports
++   RAK5005-O <->  nRF52840
++   IO1       <->  P0.17 (Arduino GPIO number 17)
++   IO2       <->  P1.02 (Arduino GPIO number 34)
++   IO3       <->  P0.21 (Arduino GPIO number 21)
++   IO4       <->  P0.04 (Arduino GPIO number 4)
++   IO5       <->  P0.09 (Arduino GPIO number 9)
++   IO6       <->  P0.10 (Arduino GPIO number 10)
++   IO7       <->  P0.28 (Arduino GPIO number 28)
++   SW1       <->  P0.01 (Arduino GPIO number 1)
++   A0        <->  P0.04/AIN2 (Arduino Analog A2
++   A1        <->  P0.31/AIN7 (Arduino Analog A7
++   SPI_CS    <->  P0.26 (Arduino GPIO number 26)
++ */
++
++// RAK4630 LoRa module
++
++/* Setup of the SX1262 LoRa module ( https://docs.rakwireless.com/Product-Categories/WisBlock/RAK4631/Datasheet/ )
++
++P1.10   NSS     SPI NSS (Arduino GPIO number 42)
++P1.11   SCK     SPI CLK (Arduino GPIO number 43)
++P1.12   MOSI    SPI MOSI (Arduino GPIO number 44)
++P1.13   MISO    SPI MISO (Arduino GPIO number 45)
++P1.14   BUSY    BUSY signal (Arduino GPIO number 46)
++P1.15   DIO1    DIO1 event interrupt (Arduino GPIO number 47)
++P1.06   NRESET  NRESET manual reset of the SX1262 (Arduino GPIO number 38)
++
++Important for successful SX1262 initialization:
++
++* Setup DIO2 to control the antenna switch
++* Setup DIO3 to control the TCXO power supply
++* Setup the SX1262 to use it's DCDC regulator and not the LDO
++* RAK4630 schematics show GPIO P1.07 connected to the antenna switch, but it should not be initialized, as DIO2 will do the
++control of the antenna switch
++
++SO GPIO 39/TXEN MAY NOT BE DEFINED FOR SUCCESSFUL OPERATION OF THE SX1262 - TG
++
++*/
++
++// configure the SET pin on the RAK12039 sensor board to disable the sensor while not reading
++// air quality telemetry.  PIN_NFC2 doesn't seem to be used anywhere else in the codebase, but if
++// you're having problems with your node behaving weirdly when a RAK12039 board isn't connected,
++// try disabling this.
++// #define PMSA003I_ENABLE_PIN PIN_NFC2
++
++// #define DETECTION_SENSOR_EN 4
++
++#define USE_SX1262
++#define SX126X_CS (42)
++#define SX126X_DIO1 (47)
++#define SX126X_BUSY (46)
++#define SX126X_RESET (38)
++// #define SX126X_TXEN (39)
++// #define SX126X_RXEN (37)
++#define SX126X_POWER_EN (37)
++// DIO2 controlls an antenna switch and the TCXO voltage is controlled by DIO3
++#define SX126X_DIO2_AS_RF_SWITCH
++#define SX126X_DIO3_TCXO_VOLTAGE 1.8
++
++// Testing USB detection
++#define NRF_APM
++
++// enables 3.3V periphery like GPS or IO Module
++// Do not toggle this for GPS power savings
++#define PIN_3V3_EN (34)
++
++// RAK1910 GPS module
++// If using the wisblock GPS module and pluged into Port A on WisBlock base
++// IO1 is hooked to PPS (pin 12 on header) = gpio 17
++// IO2 is hooked to GPS RESET = gpio 34, but it can not be used to this because IO2 is ALSO used to control 3V3_S power (1 is on).
++// Therefore must be 1 to keep peripherals powered
++// Power is on the controllable 3V3_S rail
++// #define PIN_GPS_RESET (34)
++// #define PIN_GPS_EN PIN_3V3_EN
++#define PIN_GPS_PPS (17) // Pulse per second input from the GPS
++
++#define GPS_BAUDRATE 9600
++
++#define GPS_RX_PIN PIN_SERIAL1_RX
++#define GPS_TX_PIN PIN_SERIAL1_TX
++
++// Define pin to enable GPS toggle (set GPIO to LOW) via user button triple press
++
++// RAK12002 RTC Module
++// #define RV3028_RTC (uint8_t)0b1010010
++
++// RAK18001 Buzzer in Slot C
++// #define PIN_BUZZER 21 // IO3 is PWM2
++// NEW: set this via protobuf instead!
++
++// Battery
++// The battery sense is hooked to pin A0 (5)
++#define BATTERY_PIN PIN_A0
++// and has 12 bit resolution
++#define BATTERY_SENSE_RESOLUTION_BITS 12
++#define BATTERY_SENSE_RESOLUTION 4096.0
++#undef AREF_VOLTAGE
++#define AREF_VOLTAGE 3.0
++#define VBAT_AR_INTERNAL AR_INTERNAL_3_0
++#define ADC_MULTIPLIER 1.73
++
++// #define HAS_RTC 1
++
++// #define HAS_ETHERNET 1
++
++// #define RAK_4631 1
++
++// #define PIN_ETHERNET_RESET 21
++// #define PIN_ETHERNET_SS PIN_EINK_CS
++// #define ETH_SPI_PORT SPI1
++// #define AQ_SET_PIN 10
++
++#ifdef __cplusplus
++}
++#endif
++
++/*----------------------------------------------------------------------------
++ *        Arduino objects - C++ only
++ *----------------------------------------------------------------------------*/
++
++#endif
+diff --git a/variants/heltec_mesh_node_t114-inkhud/custom_build_tasks.py b/variants/heltec_mesh_node_t114-inkhud/custom_build_tasks.py
+new file mode 100644
+index 000000000..00896e21f
+--- /dev/null
++++ b/variants/heltec_mesh_node_t114-inkhud/custom_build_tasks.py
+@@ -0,0 +1,62 @@
++# Simplifies DIY InkHUD builds, with presets for several common E-Ink displays
++# - build using custom task in Platformio's "Project Tasks" panel
++# - build with `pio run -e <variant> -t build_weact_154` (or similar)
++
++# Silence trunk's objections to the import statements
++# trunk-ignore-all(ruff/F821)
++# trunk-ignore-all(flake8/F821)
++
++from SCons.Script import COMMAND_LINE_TARGETS
++
++Import("env")
++Import("projenv")
++
++# Custom targets
++# These wrappers just run the normal build task under a different target name
++# We intercept the build later on, based on the target name
++env.AddTarget(
++    name="build_weact_154",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 1.54")',
++)
++env.AddTarget(
++    name="build_weact_213",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 2.13")',
++)
++env.AddTarget(
++    name="build_weact_290",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 2.9")',
++)
++env.AddTarget(
++    name="build_weact_420",
++    dependencies=["buildprog"],
++    actions=None,
++    title='Build (WeAct 4.2")',
++)
++
++# Check whether a build was started via one of our custom targets above
++
++if "build_weact_154" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 1.54" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "ZJY200200_0154DAAMFGN"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "15"))
++
++elif "build_weact_213" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 2.13" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "HINK_E0213A289"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "10"))
++
++elif "build_weact_290" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 2.9" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "ZJY128296_029EAAMFGN"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "15"))
++
++elif "build_weact_420" in COMMAND_LINE_TARGETS:
++    print('Building for WeAct 4.2" Display')
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DRIVER", "HINK_E042A87"))
++    projenv["CPPDEFINES"].append(("INKHUD_BUILDCONF_DISPLAYRESILIENCE", "15"))
+diff --git a/variants/heltec_mesh_node_t114-inkhud/nicheGraphics.h b/variants/heltec_mesh_node_t114-inkhud/nicheGraphics.h
+new file mode 100644
+index 000000000..339ec3353
+--- /dev/null
++++ b/variants/heltec_mesh_node_t114-inkhud/nicheGraphics.h
+@@ -0,0 +1,94 @@
++#pragma once
++
++#include "configuration.h"
++
++#ifdef MESHTASTIC_INCLUDE_NICHE_GRAPHICS
++
++// InkHUD-specific components
++// ---------------------------
++#include "graphics/niche/InkHUD/InkHUD.h"
++
++// Applets
++#include "graphics/niche/InkHUD/Applets/User/AllMessage/AllMessageApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/DM/DMApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/Heard/HeardApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/Positions/PositionsApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/RecentsList/RecentsListApplet.h"
++#include "graphics/niche/InkHUD/Applets/User/ThreadedMessage/ThreadedMessageApplet.h"
++
++// Shared NicheGraphics components
++// --------------------------------
++#include "graphics/niche/Drivers/EInk/HINK_E0213A289.h"        // WeAct 2.13"
++#include "graphics/niche/Drivers/EInk/HINK_E042A87.h"          // WeAct 4.2"
++#include "graphics/niche/Drivers/EInk/ZJY128296_029EAAMFGN.h"  // WeAct 2.9"
++#include "graphics/niche/Drivers/EInk/ZJY200200_0154DAAMFGN.h" // WeACt 1.54"
++
++#include "graphics/niche/Inputs/TwoButton.h"
++
++#if !defined(INKHUD_BUILDCONF_DRIVER) || !defined(INKHUD_BUILDCONF_DISPLAYRESILIENCE)
++#error If not using a DIY preset, display model and resilience must be set manually
++#endif
++
++void setupNicheGraphics()
++{
++    using namespace NicheGraphics;
++
++    // SPI
++    // -----------------------------
++    SPI1.begin();
++
++    // Driver
++    // -----------------------------
++
++    // Use E-Ink driver
++    Drivers::EInk *driver = new Drivers::INKHUD_BUILDCONF_DRIVER;
++    driver->begin(&SPI1, PIN_EINK_DC, PIN_EINK_CS, PIN_EINK_BUSY, PIN_EINK_RES);
++
++    // InkHUD
++    // ----------------------------
++
++    InkHUD::InkHUD *inkhud = InkHUD::InkHUD::getInstance();
++
++    // Set the driver
++    inkhud->setDriver(driver);
++
++    // Set how many FAST updates per FULL update.
++    inkhud->setDisplayResilience(INKHUD_BUILDCONF_DISPLAYRESILIENCE); // Suggest roughly ten
++
++    // Prepare fonts
++    InkHUD::Applet::fontLarge = FREESANS_9PT_WIN1252;
++    InkHUD::Applet::fontSmall = FREESANS_6PT_WIN1252;
++
++    // Init settings, and customize defaults
++    // Values ignored individually if found saved to flash
++    inkhud->persistence->settings.rotation = (driver->height > driver->width ? 1 : 0); // Rotate 90deg to landscape, if needed
++    inkhud->persistence->settings.userTiles.maxCount = 4;
++    inkhud->persistence->settings.optionalFeatures.batteryIcon = true;
++
++    // Pick applets
++    // Note: order of applets determines priority of "auto-show" feature
++    inkhud->addApplet("All Messages", new InkHUD::AllMessageApplet);
++    inkhud->addApplet("DMs", new InkHUD::DMApplet, true, false, 3);                       // Default on tile 3
++    inkhud->addApplet("Channel 0", new InkHUD::ThreadedMessageApplet(0), true, false, 2); // Default on tile 2
++    inkhud->addApplet("Channel 1", new InkHUD::ThreadedMessageApplet(1));
++    inkhud->addApplet("Positions", new InkHUD::PositionsApplet, true, false, 1);      // Default on tile 1
++    inkhud->addApplet("Recents List", new InkHUD::RecentsListApplet, true, false, 0); // Default on tile 0
++    inkhud->addApplet("Heard", new InkHUD::HeardApplet, true);                        // Background
++
++    // Start running InkHUD
++    inkhud->begin();
++
++    // Buttons
++    // --------------------------
++
++    Inputs::TwoButton *buttons = Inputs::TwoButton::getInstance(); // Shared NicheGraphics component
++
++    // #0: Main User Button
++    buttons->setWiring(0, Inputs::TwoButton::getUserButtonPin());
++    buttons->setHandlerShortPress(0, [inkhud]() { inkhud->shortpress(); });
++    buttons->setHandlerLongPress(0, [inkhud]() { inkhud->longpress(); });
++
++    buttons->start();
++}
++
++#endif
+\ No newline at end of file
+diff --git a/variants/heltec_mesh_node_t114-inkhud/platformio.ini b/variants/heltec_mesh_node_t114-inkhud/platformio.ini
+new file mode 100644
+index 000000000..9a5673040
+--- /dev/null
++++ b/variants/heltec_mesh_node_t114-inkhud/platformio.ini
+@@ -0,0 +1,19 @@
++[env:heltec-mesh-node-t114-inkhud]
++board_level = extra
++extends = nrf52840_base, inkhud
++board = heltec_mesh_node_t114
++board_check = true
++build_flags = 
++  ${nrf52840_base.build_flags}
++  ${inkhud.build_flags}
++  -I variants/heltec_mesh_node_t114-inkhud
++build_src_filter = 
++  ${nrf52_base.build_src_filter} 
++  ${inkhud.build_src_filter}
++lib_deps = 
++  ${inkhud.lib_deps} ; InkHUD libs first, so we get GFXRoot instead of AdafruitGFX
++  ${nrf52840_base.lib_deps}
++  lewisxhe/PCF8563_Library@^1.0.1
++extra_scripts =
++  ${env.extra_scripts}
++  variants/diy/nrf52_promicro_diy_tcxo/custom_build_tasks.py ; Add to PIO's Project Tasks pane: preset builds for common displays
+\ No newline at end of file
+diff --git a/variants/heltec_mesh_node_t114-inkhud/variant.cpp b/variants/heltec_mesh_node_t114-inkhud/variant.cpp
+new file mode 100644
+index 000000000..85c9f4a72
+--- /dev/null
++++ b/variants/heltec_mesh_node_t114-inkhud/variant.cpp
+@@ -0,0 +1,38 @@
++/*
++  Copyright (c) 2014-2015 Arduino LLC.  All right reserved.
++  Copyright (c) 2016 Sandeep Mistry All right reserved.
++  Copyright (c) 2018, Adafruit Industries (adafruit.com)
++
++  This library is free software; you can redistribute it and/or
++  modify it under the terms of the GNU Lesser General Public
++  License as published by the Free Software Foundation; either
++  version 2.1 of the License, or (at your option) any later version.
++
++  This library is distributed in the hope that it will be useful,
++  but WITHOUT ANY WARRANTY; without even the implied warranty of
++  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
++  See the GNU Lesser General Public License for more details.
++
++  You should have received a copy of the GNU Lesser General Public
++  License along with this library; if not, write to the Free Software
++  Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++*/
++
++#include "variant.h"
++#include "nrf.h"
++#include "wiring_constants.h"
++#include "wiring_digital.h"
++
++const uint32_t g_ADigitalPinMap[] = {
++    // P0 - pins 0 and 1 are hardwired for xtal and should never be enabled
++    0xff, 0xff, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31,
++
++    // P1
++    32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47};
++
++void initVariant()
++{
++    // LED1
++    pinMode(PIN_LED1, OUTPUT);
++    ledOff(PIN_LED1);
++}
+diff --git a/variants/heltec_mesh_node_t114-inkhud/variant.h b/variants/heltec_mesh_node_t114-inkhud/variant.h
+new file mode 100644
+index 000000000..39cbc8f01
+--- /dev/null
++++ b/variants/heltec_mesh_node_t114-inkhud/variant.h
+@@ -0,0 +1,175 @@
++// Unlike many other InkHUD variants, this environment does require its own variant.h file
++// This is because the default T114 variant maps SPI1 pins to the optional TFT display, and those pins are not broken out
++
++#ifndef _VARIANT_HELTEC_NRF_
++#define _VARIANT_HELTEC_NRF_
++/** Master clock frequency */
++#define VARIANT_MCK (64000000ul)
++
++#define USE_LFXO // Board uses 32khz crystal for LF
++
++/*----------------------------------------------------------------------------
++ *        Headers
++ *----------------------------------------------------------------------------*/
++
++#include "WVariant.h"
++
++#ifdef __cplusplus
++extern "C" {
++#endif // __cplusplus
++
++#define HELTEC_MESH_NODE_T114
++
++// Number of pins defined in PinDescription array
++#define PINS_COUNT (48)
++#define NUM_DIGITAL_PINS (48)
++#define NUM_ANALOG_INPUTS (1)
++#define NUM_ANALOG_OUTPUTS (0)
++
++// LEDs
++#define PIN_LED1 (32 + 3) // green (confirmed on 1.0 board)
++#define LED_BLUE PIN_LED1 // fake for bluefruit library
++#define LED_GREEN PIN_LED1
++#define LED_BUILTIN LED_GREEN
++#define LED_STATE_ON 0 // State when LED is lit
++
++#define HAS_NEOPIXEL                         // Enable the use of neopixels
++#define NEOPIXEL_COUNT 2                     // How many neopixels are connected
++#define NEOPIXEL_DATA 14                     // gpio pin used to send data to the neopixels
++#define NEOPIXEL_TYPE (NEO_GRB + NEO_KHZ800) // type of neopixels in use
++
++/*
++ * Buttons
++ */
++#define PIN_BUTTON1 (32 + 10)
++// #define PIN_BUTTON2 (0 + 18)      // 0.18 is labeled on the board as RESET but we configure it in the bootloader as a regular
++// GPIO
++
++/*
++No longer populated on PCB
++*/
++#define PIN_SERIAL2_RX (0 + 9)
++#define PIN_SERIAL2_TX (0 + 10)
++//  #define PIN_SERIAL2_EN (0 + 17)
++
++/*
++ * I2C
++ */
++
++#define WIRE_INTERFACES_COUNT 2
++
++// I2C bus 0
++// Routed to footprint for PCF8563TS RTC
++// Not populated on T114 V1, maybe in future?
++#define PIN_WIRE_SDA (0 + 26) // P0.26
++#define PIN_WIRE_SCL (0 + 27) // P0.27
++
++// I2C bus 1
++// Available on header pins, for general use
++#define PIN_WIRE1_SDA (0 + 16) // P0.16
++#define PIN_WIRE1_SCL (0 + 13) // P0.13
++
++/*
++ * Lora radio
++ */
++
++#define USE_SX1262
++// #define USE_SX1268
++#define SX126X_CS (0 + 24) // FIXME - we really should define LORA_CS instead
++#define LORA_CS (0 + 24)
++#define SX126X_DIO1 (0 + 20)
++// Note DIO2 is attached internally to the module to an analog switch for TX/RX switching
++// #define SX1262_DIO3 (0 + 21)
++// This is used as an *output* from the sx1262 and connected internally to power the tcxo, do not drive from the
++//    main
++// CPU?
++#define SX126X_BUSY (0 + 17)
++#define SX126X_RESET (0 + 25)
++// Not really an E22 but TTGO seems to be trying to clone that
++#define SX126X_DIO2_AS_RF_SWITCH
++#define SX126X_DIO3_TCXO_VOLTAGE 1.8
++
++/*
++ * E-Ink DIY
++ */
++#define PIN_EINK_MOSI (0 + 8) // also called SDA
++#define PIN_EINK_SCLK (0 + 7)
++#define PIN_EINK_CS (32 + 12)
++#define PIN_EINK_DC (32 + 14)
++#define PIN_EINK_RES (0 + 5)
++#define PIN_EINK_BUSY (32 + 15)
++
++/*
++ * GPS pins
++ */
++
++#define GPS_L76K
++
++// #define PIN_GPS_RESET (32 + 6) // An output to reset L76K GPS. As per datasheet, low for > 100ms will reset the L76K
++#define GPS_RESET_MODE LOW
++// #define PIN_GPS_EN (21)
++#define VEXT_ENABLE (0 + 21)
++#define PERIPHERAL_WARMUP_MS 1000 // Make sure I2C QuickLink has stable power before continuing
++#define VEXT_ON_VALUE HIGH
++// #define GPS_EN_ACTIVE HIGH
++#define PIN_GPS_STANDBY (32 + 2) // An output to wake GPS, low means allow sleep, high means force wake
++#define PIN_GPS_PPS (32 + 4)
++// Seems to be missing on this new board
++// #define PIN_GPS_PPS (32 + 4)  // Pulse per second input from the GPS
++#define GPS_TX_PIN (32 + 5) // This is for bits going TOWARDS the CPU
++#define GPS_RX_PIN (32 + 7) // This is for bits going TOWARDS the GPS
++
++#define GPS_THREAD_INTERVAL 50
++
++#define PIN_SERIAL1_RX GPS_TX_PIN
++#define PIN_SERIAL1_TX GPS_RX_PIN
++
++// PCF8563 RTC Module
++#define PCF8563_RTC 0x51
++
++/*
++ * SPI Interfaces
++ */
++#define SPI_INTERFACES_COUNT 2
++
++// For LORA, spi 0
++#define PIN_SPI_MISO (0 + 23)
++#define PIN_SPI_MOSI (0 + 22)
++#define PIN_SPI_SCK (0 + 19)
++
++#define PIN_SPI1_MISO -1
++#define PIN_SPI1_MOSI PIN_EINK_MOSI
++#define PIN_SPI1_SCK PIN_EINK_SCLK
++
++// #define PIN_PWR_EN (0 + 6)
++
++// To debug via the segger JLINK console rather than the CDC-ACM serial device
++// #define USE_SEGGER
++
++// Battery
++// The battery sense is hooked to pin A0 (4)
++// it is defined in the anlaolgue pin section of this file
++// and has 12 bit resolution
++
++#define ADC_CTRL 6
++#define ADC_CTRL_ENABLED HIGH
++#define BATTERY_PIN 4
++#define ADC_RESOLUTION 14
++
++#define BATTERY_SENSE_RESOLUTION_BITS 12
++#define BATTERY_SENSE_RESOLUTION 4096.0
++#undef AREF_VOLTAGE
++#define AREF_VOLTAGE 3.0
++#define VBAT_AR_INTERNAL AR_INTERNAL_3_0
++#define ADC_MULTIPLIER (4.90F)
++
++#define HAS_RTC 0
++#ifdef __cplusplus
++}
++#endif
++
++/*----------------------------------------------------------------------------
++ *        Arduino objects - C++ only
++ *----------------------------------------------------------------------------*/
++
++#endif
+diff --git a/variants/heltec_mesh_pocket/platformio.ini b/variants/heltec_mesh_pocket/platformio.ini
+index 6632c10fe..2f3886887 100644
+--- a/variants/heltec_mesh_pocket/platformio.ini
++++ b/variants/heltec_mesh_pocket/platformio.ini
+@@ -28,7 +28,7 @@ lib_deps =
+   https://github.com/meshtastic/GxEPD2#b202ebfec6a4821e098cf7a625ba0f6f2400292d
+ 
+ 
+-[env:heltec-mesh-pocket-inkhud-5000]
++[env:heltec-mesh-pocket-5000-inkhud]
+ extends = nrf52840_base, inkhud
+ board = heltec_mesh_pocket
+ build_src_filter = ${nrf52_base.build_src_filter} +<../variants/heltec_mesh_pocket> ${inkhud.build_src_filter}
+@@ -73,7 +73,7 @@ lib_deps =
+   https://github.com/meshtastic/GxEPD2#b202ebfec6a4821e098cf7a625ba0f6f2400292d
+ 
+ 
+-[env:heltec-mesh-pocket-inkhud-10000]
++[env:heltec-mesh-pocket-10000-inkhud]
+ extends = nrf52840_base, inkhud
+ board = heltec_mesh_pocket
+ build_src_filter = ${nrf52_base.build_src_filter} +<../variants/heltec_mesh_pocket> ${inkhud.build_src_filter}
+diff --git a/variants/rak4631/variant.h b/variants/rak4631/variant.h
+index 0da1c04ea..82c914892 100644
+--- a/variants/rak4631/variant.h
++++ b/variants/rak4631/variant.h
+@@ -219,6 +219,10 @@ SO GPIO 39/TXEN MAY NOT BE DEFINED FOR SUCCESSFUL OPERATION OF THE SX1262 - TG
+ 
+ // Testing USB detection
+ #define NRF_APM
++// If using a power chip like the INA3221 you can override the default battery voltage channel below
++// and comment out NRF_APM to use the INA3221 instead of the USB detection for charging
++// #define INA3221_BAT_CH INA3221_CH2
++// #define INA3221_ENV_CH INA3221_CH1
+ 
+ // enables 3.3V periphery like GPS or IO Module
+ // Do not toggle this for GPS power savings
+diff --git a/variants/seeed_xiao_nrf52840_kit/variant.h b/variants/seeed_xiao_nrf52840_kit/variant.h
+index e6ef74e2e..5d45d6ea1 100644
+--- a/variants/seeed_xiao_nrf52840_kit/variant.h
++++ b/variants/seeed_xiao_nrf52840_kit/variant.h
+@@ -142,7 +142,6 @@ static const uint8_t SCL = PIN_WIRE_SCL;
+ #define PIN_GPS_RX D6
+ #define PIN_GPS_TX D7
+ #define HAS_GPS 1
+-#define GPS_BAUDRATE 9600
+ #define GPS_THREAD_INTERVAL 50
+ #define PIN_SERIAL1_RX PIN_GPS_TX
+ #define PIN_SERIAL1_TX PIN_GPS_RX
